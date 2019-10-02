@@ -2,11 +2,16 @@ package PO73.Perepechin.wdad.data.managers;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 
@@ -24,33 +29,58 @@ public class PreferencesManager {
         parseXML();
     }
 
-    private Node getRmiNode() {
-        return document.getDocumentElement().getElementsByTagName("rmi").item(0);
+    public boolean getCreateRegistry() {
+        Node createRegistryNode = findNode("createregistry");
+        return createRegistryNode.getTextContent().equals("yes");
     }
 
-    private Node getRegistryNodeChild(String nodeName) {
-        Node rmi = getRmiNode();
+    public void setCreateRegistry(boolean createRegistry) {
+        Node createRegistryNode = findNode("createregistry");
+        createRegistryNode.setTextContent(createRegistry ? "yes" : "no");
+        saveXML();
+    }
 
-        NodeList rmiChilds = rmi.getChildNodes();
-        for (int i = 0; i < rmiChilds.getLength(); i++) {
-            Node rmiChild = rmiChilds.item(i);
-            if (rmiChild.getNodeType() == Node.ELEMENT_NODE && rmiChild.getNodeName().equals("server")) {
-                NodeList serverChilds = rmiChild.getChildNodes();
-                for (int j = 0; j < serverChilds.getLength(); j++) {
-                    Node registryNode = serverChilds.item(j);
-                    if (registryNode.getNodeType() == Node.ELEMENT_NODE && registryNode.getNodeName().equals("registry")) {
-                        return registryNode;
-                    }
-                }
-            }
-        }
-        return null;
+    public String getRegistryAddress() {
+        Node registryAddressNode = findNode("registryaddress");
+        return registryAddressNode.getTextContent();
+    }
+
+    public void setRegistryAddress(String address) {
+        Node registryAddressNode = findNode("registryaddress");
+        registryAddressNode.setTextContent(address);
+        saveXML();
+    }
+
+    public int getRegistryPort() {
+        Node registryPortNode = findNode("registryport");
+        return Integer.parseInt(registryPortNode.getTextContent());
+    }
+
+    public void setRegistryPort(int port) {
+        Node registryPortNode = findNode("registryport");
+        registryPortNode.setTextContent(Integer.toString(port));
+        saveXML();
+    }
+
+    private Node findNode(String name) {
+        return document.getElementsByTagName(name).item(0);
     }
 
     private void parseXML() {
         try {
             document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(APPGONFIG_PATH));
         } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveXML() {
+        try {
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "3");
+            transformer.transform(new DOMSource(document), new StreamResult(new File(APPGONFIG_PATH)));
+        } catch (TransformerException e) {
             e.printStackTrace();
         }
     }
