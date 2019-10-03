@@ -123,6 +123,7 @@ public class XmlTask {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "3");
+            transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "housekeeper.dtd");
             transformer.transform(new DOMSource(document), new StreamResult(xmlFile));
         } catch (TransformerException e) {
             e.printStackTrace();

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE housekeeper SYSTEM "housekeeper.dtd">
 <housekeeper>
     <tariffs coldwater="1" electricity="2" gas="10.0" hotwater="1"/>
     <building flatsquantity="5" number="221" street="Baker Street">
